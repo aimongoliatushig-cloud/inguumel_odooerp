@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Inherit Warehouse Form: Location Mapping as Many2one dropdowns (Aimag / Sum). -->
+  <record id="view_warehouse_form_location_mapping" model="ir.ui.view">
+    <field name="name">stock.warehouse.form.location.mapping</field>
+    <field name="model">stock.warehouse</field>
+    <field name="inherit_id" ref="stock.view_warehouse"/>
+    <field name="arch" type="xml">
+      <xpath expr="//sheet" position="inside">
+        <section string="Location Mapping">
+          <group>
+            <field name="x_aimag_id" options="{'no_create': True}"/>
+            <field name="x_sum_id" options="{'no_create': True}" domain="[('aimag_id','=',x_aimag_id)]"/>
+          </group>
+          <group>
+            <div class="text-muted" colspan="2">
+              One sum can be linked to at most one warehouse. Sum list is filtered by selected Aimag.
+            </div>
+          </group>
+        </section>
+      </xpath>
+    </field>
+  </record>
+
+  <!-- Inherit Warehouse Tree: show Aimag and Sum as relational columns. -->
+  <record id="view_warehouse_tree_location_mapping" model="ir.ui.view">
+    <field name="name">stock.warehouse.tree.location.mapping</field>
+    <field name="model">stock.warehouse</field>
+    <field name="inherit_id" ref="stock.view_warehouse_tree"/>
+    <field name="arch" type="xml">
+      <xpath expr="//field[@name='partner_id']" position="after">
+        <field name="x_aimag_id" groups="stock.group_stock_manager"/>
+        <field name="x_sum_id" groups="stock.group_stock_manager"/>
+      </xpath>
+    </field>
+  </record>
+</odoo>

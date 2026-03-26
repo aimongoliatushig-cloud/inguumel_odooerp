@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mxm_order_status_log,access_mxm_order_status_log,inguumel_order_mxm.model_mxm_order_status_log,,1,1,1,1

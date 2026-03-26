@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="inguumel_credit_pos.CreditRepaymentPopup" owl="1">
+        <div class="credit-repayment-popup modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Зээл төлөлт</h5>
+                </div>
+                <div class="modal-body">
+                    <t t-if="state.loading">Уншиж байна...</t>
+                    <t t-elif="state.error and !state.selectedLoanId and state.loans.length === 0">
+                        <p class="text-warning" t-esc="state.error"/>
+                    </t>
+                    <t t-else="">
+                        <t t-if="state.loans.length === 0 and !state.loading">
+                            <p>Идэвхтэй зээл олдсонгүй.</p>
+                        </t>
+                        <t t-else="">
+                            <t t-if="state.loans.length &gt; 0">
+                                <div class="mb-2">
+                                    <label>Зээл сонгох</label>
+                                    <select class="form-select" t-model="state.selectedLoanId">
+                                        <t t-foreach="state.loans" t-as="loan" t-key="loan.id">
+                                            <option t-att-value="loan.id" t-esc="loan.name"/>
+                                        </t>
+                                    </select>
+                                </div>
+                                <t t-if="selectedLoan">
+                                    <div class="mb-2">
+                                        <span>Нийт дүн:</span>
+                                        <strong t-esc="selectedLoan.amount_total"/>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span>Төлөгдсөн:</span>
+                                        <strong t-esc="selectedLoan.amount_paid"/>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span>Үлдэгдэл:</span>
+                                        <strong t-esc="selectedLoan.amount_residual"/>
+                                    </div>
+                                    <div class="mb-2">
+                                        <span>Төлөх огноо:</span>
+                                        <strong t-esc="selectedLoan.date_due"/>
+                                        <t t-if="selectedLoan.is_overdue">
+                                            <span class="text-danger"> (Хугацаа хэтэрсэн)</span>
+                                        </t>
+                                    </div>
+                                </t>
+                                <div class="mb-2">
+                                    <label>Төлөх огноо оруулна уу</label>
+                                    <input type="date" class="form-control" t-model="state.date"/>
+                                </div>
+                                <div class="mb-2">
+                                    <label>Зээлийн төлөлтийн дүн оруулна уу</label>
+                                    <input type="number" step="0.01" class="form-control" t-model="state.amount" placeholder="Дүн"/>
+                                </div>
+                                <t t-if="state.error">
+                                    <p class="text-danger" t-esc="state.error"/>
+                                </t>
+                            </t>
+                        </t>
+                    </t>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" t-on-click="onCancel">Буцах</button>
+                    <button type="button" class="btn btn-primary" t-on-click="onConfirm" t-att-disabled="state.loans.length === 0 || state.loading">Баталгаажуулах</button>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

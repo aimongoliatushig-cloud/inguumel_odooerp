@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Inventory → Configuration → Product Categories → (Category) → Icon upload -->
+    <record id="product_category_form_view_icon" model="ir.ui.view">
+        <field name="name">product.category.form.inguumel.icon</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='first']" position="after">
+                <group string="Mobile Icon" name="mobile_icon">
+                    <field name="x_icon_enabled"/>
+                    <field name="x_icon_image"/>
+                    <field name="x_icon_mime" placeholder="e.g. image/png or image/svg+xml"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="product_category_list_view_icon" model="ir.ui.view">
+        <field name="name">product.category.list.inguumel.icon</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_list_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="inside">
+                <field name="x_icon_image" widget="image" class="o_list_image_small" optional="hide"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

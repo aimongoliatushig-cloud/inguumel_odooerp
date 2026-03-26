@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_inguumel_credit_request_form" model="ir.ui.view">
+    <field name="name">inguumel.credit.request.form</field>
+    <field name="model">inguumel.credit.request</field>
+    <field name="arch" type="xml">
+      <form string="Зээлийн хүсэлт">
+        <sheet>
+          <group>
+            <group>
+              <field name="warehouse_id"/>
+              <field name="partner_id"/>
+              <field name="amount_requested"/>
+              <field name="amount_approved"/>
+              <field name="currency_id"/>
+              <field name="date_due"/>
+              <field name="state"/>
+              <field name="user_id" readonly="1"/>
+              <field name="reason"/>
+            </group>
+          </group>
+        </sheet>
+        <footer>
+          <button name="action_approve" string="Зөвшөөрөх" type="object" class="btn-primary" invisible="state != 'draft'"/>
+          <button name="action_reject" string="Татгалзах" type="object" invisible="state != 'draft'"/>
+        </footer>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_inguumel_credit_request_tree" model="ir.ui.view">
+    <field name="name">inguumel.credit.request.tree</field>
+    <field name="model">inguumel.credit.request</field>
+    <field name="arch" type="xml">
+      <list string="Зээлийн хүсэлтүүд">
+        <field name="warehouse_id"/>
+        <field name="partner_id"/>
+        <field name="amount_requested"/>
+        <field name="amount_approved"/>
+        <field name="date_due"/>
+        <field name="state"/>
+        <field name="user_id"/>
+      </list>
+    </field>
+  </record>
+</odoo>

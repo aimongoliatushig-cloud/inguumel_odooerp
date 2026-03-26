@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- COD-only strict flow: cron disabled by default. Driver ≠ Paid; only cashier Cash Confirm sets x_paid. -->
+  <record id="cron_cod_auto_paid" model="ir.cron">
+    <field name="name">COD: Auto-paid when delivered</field>
+    <field name="model_id" ref="sale.model_sale_order"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_cod_auto_paid()</field>
+    <field name="interval_number">5</field>
+    <field name="interval_type">minutes</field>
+    <field name="active" eval="False"/>
+  </record>
+</odoo>

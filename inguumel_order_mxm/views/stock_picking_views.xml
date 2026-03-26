@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form: Instruction-panel UX for outgoing + sale_id — TOP CARD, ONE button, timeline, hide internal buttons -->
+    <record id="view_picking_form_mxm" model="ir.ui.view">
+        <field name="name">stock.picking.form.mxm</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="sale_stock.view_picking_form"/>
+        <field name="active" eval="False"/>
+        <field name="arch" type="xml">
+            <!-- Fields used in view (picking_type_code may come from stock module) -->
+            <xpath expr="//field[@name='sale_id']" position="after">
+                <field name="mxm_sale_order_id" invisible="1"/>
+                <field name="picking_type_code" invisible="1"/>
+                <field name="mxm_order_last_status_code" invisible="1"/>
+                <field name="mxm_order_last_status_label_mn" invisible="1"/>
+                <field name="mxm_next_action_label" invisible="1"/>
+                <field name="mxm_next_action_help" invisible="1"/>
+                <field name="mxm_timeline_html" invisible="1"/>
+            </xpath>
+            <!-- HEADER BLOCK: "ЗАХИАЛГЫН ЯВЦ" — big card (outgoing + mxm_sale_order_id only) -->
+            <xpath expr="//sheet" position="inside">
+                <div class="alert alert-primary mb-3" role="alert" invisible="picking_type_code != 'outgoing' or not mxm_sale_order_id" name="mxm_top_card">
+                    <h4 class="alert-heading text-uppercase mb-2">ЗАХИАЛГЫН ЯВЦ</h4>
+                    <p class="mb-1">
+                        <strong>Захиалга:</strong> <field name="sale_id" nolabel="1" readonly="1" class="d-inline"/> —
+                        <strong>Хүргэлт:</strong> <field name="name" nolabel="1" readonly="1" class="d-inline"/>
+                    </p>
+                    <p class="mb-1 text-muted small">Одоогийн шат</p>
+                    <field name="mxm_order_last_status_label_mn" class="display-6 fw-bold mb-2" readonly="1" nolabel="1"/>
+                    <p class="mb-0 text-muted small">Дараагийн алхам</p>
+                    <field name="mxm_next_action_help" class="mb-0" readonly="1" nolabel="1" widget="text"/>
+                </div>
+            </xpath>
+            <!-- PROGRESS TIMELINE: 5-step horizontal (done/active/todo, HH:MM) -->
+            <xpath expr="//div[@name='mxm_top_card']" position="after">
+                <div invisible="picking_type_code != 'outgoing' or not mxm_sale_order_id" class="mb-3">
+                    <field name="mxm_timeline_html" nolabel="1" readonly="1" widget="html"/>
+                </div>
+            </xpath>
+            <!-- NEXT ACTION AREA: one button per allowed transition; visible only to stock users -->
+            <xpath expr="//div[@name='mxm_top_card']" position="after">
+                <div class="alert alert-success mb-3" role="alert" invisible="picking_type_code != 'outgoing' or not mxm_sale_order_id" name="mxm_next_action_card" groups="stock.group_stock_user">
+                    <button name="action_mxm_preparing"
+                            string="Бэлтгэж байна"
+                            type="object"
+                            class="btn btn-lg btn-success"
+                            invisible="mxm_order_last_status_code != 'received'"/>
+                    <button name="action_mxm_prepared"
+                            string="Бэлтгэж дууссан"
+                            type="object"
+                            class="btn btn-lg btn-success"
+                            invisible="mxm_order_last_status_code != 'preparing'"/>
+                    <button name="action_mxm_out_for_delivery"
+                            string="Хүргэлтэд гарсан"
+                            type="object"
+                            class="btn btn-lg btn-success"
+                            invisible="mxm_order_last_status_code != 'prepared'"/>
+                    <button name="action_mxm_delivered"
+                            string="Хүргэгдсэн"
+                            type="object"
+                            class="btn btn-lg btn-success"
+                            invisible="mxm_order_last_status_code != 'out_for_delivery'"/>
+                    <span class="badge bg-success fs-6 px-3 py-2" invisible="mxm_order_last_status_code != 'delivered'">Дууссан</span>
+                </div>
+            </xpath>
+            <!-- AUDIT / HISTORY: ✓/● Label — HH:MM — source — user -->
+            <xpath expr="//div[@name='mxm_next_action_card']" position="after">
+                <group string="Түүх (шат өөрчлөлт)" name="mxm_audit_group" invisible="picking_type_code != 'outgoing' or not mxm_sale_order_id">
+                    <field name="mxm_order_status_log_ids" nolabel="1" readonly="1">
+                        <list decoration-muted="[('is_last', '=', False)]" create="0" delete="0" edit="0" default_order="at asc">
+                            <field name="display_line"/>
+                            <field name="at_hhmm"/>
+                            <field name="source"/>
+                            <field name="user_id" optional="show"/>
+                        </list>
+                    </field>
+                </group>
+            </xpath>
+            <!-- Hide standard Odoo buttons when MXM flow (outgoing + mxm_sale_order_id) -->
+            <xpath expr="//header/button[@name='action_confirm']" position="attributes">
+                <attribute name="invisible">state != 'draft' or (picking_type_code == 'outgoing' and mxm_sale_order_id)</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='action_assign']" position="attributes">
+                <attribute name="invisible">not show_check_availability or (picking_type_code == 'outgoing' and mxm_sale_order_id)</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='button_validate'][1]" position="attributes">
+                <attribute name="invisible">state in ('draft', 'confirmed', 'done', 'cancel') or (picking_type_code == 'outgoing' and mxm_sale_order_id)</attribute>
+            </xpath>
+            <xpath expr="//header/button[@name='button_validate'][2]" position="attributes">
+                <attribute name="invisible">state in ('waiting', 'assigned', 'done', 'cancel') or (picking_type_code == 'outgoing' and mxm_sale_order_id)</attribute>
+            </xpath>
+            <!-- Hide statusbar when MXM flow so staff don't see internal states -->
+            <xpath expr="//header/field[@name='state'][@widget='statusbar']" position="attributes">
+                <attribute name="invisible">picking_type_code == 'outgoing' and mxm_sale_order_id</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- List: column Захиалгын шат (Mongolian label) -->
+    <record id="view_picking_list_mxm" model="ir.ui.view">
+        <field name="name">stock.picking.list.mxm</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="mxm_order_last_status_label_mn" string="Захиалгын шат" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Search: filters by stage (mxm_order_last_status_code is stored on stock.picking, so searchable) -->
+    <record id="view_picking_search_mxm" model="ir.ui.view">
+        <field name="name">stock.picking.search.mxm</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_internal_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search/field[@name='origin']" position="after">
+                <field name="mxm_order_last_status_code"/>
+            </xpath>
+            <xpath expr="//search/filter[@name='delivery']" position="after">
+                <separator/>
+                <filter name="mxm_received" string="Захиалга авлаа" domain="[('mxm_order_last_status_code', '=', 'received')]"/>
+                <filter name="mxm_preparing" string="Бэлтгэж байна" domain="[('mxm_order_last_status_code', '=', 'preparing')]"/>
+                <filter name="mxm_prepared" string="Бэлтгэж дууссан" domain="[('mxm_order_last_status_code', '=', 'prepared')]"/>
+                <filter name="mxm_out" string="Хүргэлтэд гарсан" domain="[('mxm_order_last_status_code', '=', 'out_for_delivery')]"/>
+                <filter name="mxm_delivered" string="Хүргэгдсэн" domain="[('mxm_order_last_status_code', '=', 'delivered')]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

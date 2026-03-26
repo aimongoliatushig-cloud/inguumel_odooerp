@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <menuitem id="menu_inguumel_credit_root"
+            name="Ингүүмэл"
+            sequence="50"/>
+  <menuitem id="menu_inguumel_credit_management"
+            name="Зээлийн удирдлага"
+            parent="menu_inguumel_credit_root"
+            sequence="10"/>
+  <menuitem id="menu_inguumel_credit_loan"
+            name="Зээлүүд"
+            parent="menu_inguumel_credit_management"
+            action="action_inguumel_credit_loan"
+            sequence="10"/>
+  <menuitem id="menu_inguumel_credit_request"
+            name="Зээлийн хүсэлтүүд"
+            parent="menu_inguumel_credit_management"
+            action="action_inguumel_credit_request"
+            sequence="20"/>
+</odoo>

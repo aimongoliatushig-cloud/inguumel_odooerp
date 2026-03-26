@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_lucky_wheel_prize_tree" model="ir.ui.view">
+    <field name="name">lucky.wheel.prize.tree</field>
+    <field name="model">lucky.wheel.prize</field>
+    <field name="arch" type="xml">
+      <list string="Lucky Wheel Prizes" create="0" decoration-muted="state in ('expired',)" decoration-success="state == 'redeemed'" decoration-info="state in ('won', 'pending')">
+        <field name="user_id"/>
+        <field name="partner_id"/>
+        <field name="warehouse_id"/>
+        <field name="prize_type"/>
+        <field name="product_id"/>
+        <field name="state"/>
+        <field name="won_at"/>
+        <field name="expires_at"/>
+        <field name="redeemed_at"/>
+        <field name="redeem_channel"/>
+      </list>
+    </field>
+  </record>
+  <record id="view_lucky_wheel_prize_form" model="ir.ui.view">
+    <field name="name">lucky.wheel.prize.form</field>
+    <field name="model">lucky.wheel.prize</field>
+    <field name="arch" type="xml">
+      <form string="Lucky Wheel Prize" create="0" delete="0">
+        <sheet>
+          <group>
+            <group>
+              <field name="user_id"/>
+              <field name="partner_id"/>
+              <field name="warehouse_id"/>
+              <field name="prize_type"/>
+              <field name="product_id" invisible="prize_type != 'product'"/>
+              <field name="coupon_payload" invisible="prize_type != 'coupon'"/>
+              <field name="state"/>
+              <field name="node_index"/>
+              <field name="is_top_prize"/>
+            </group>
+            <group string="Dates">
+              <field name="won_at"/>
+              <field name="expires_at"/>
+              <field name="redeemed_at"/>
+              <field name="redeemed_by_user_id"/>
+              <field name="redeem_channel"/>
+            </group>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+</odoo>

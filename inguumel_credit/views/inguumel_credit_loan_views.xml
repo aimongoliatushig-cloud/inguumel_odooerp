@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Loan form -->
+  <record id="view_inguumel_credit_loan_form" model="ir.ui.view">
+    <field name="name">inguumel.credit.loan.form</field>
+    <field name="model">inguumel.credit.loan</field>
+    <field name="arch" type="xml">
+      <form string="Зээл">
+        <header>
+          <button name="action_add_repayment" string="Төлөлт нэмэх" type="object" invisible="state in ('cancelled','paid')"/>
+          <button name="action_cancel" string="Цуцлах" type="object" class="btn-danger" invisible="state in ('cancelled','paid')"/>
+        </header>
+        <sheet>
+          <field name="state" widget="statusbar" statusbar_visible="open,partial,paid"/>
+          <group>
+            <group string="Ерөнхий мэдээлэл">
+              <field name="name"/>
+              <field name="warehouse_id"/>
+              <field name="partner_id"/>
+              <field name="currency_id"/>
+              <field name="amount_total"/>
+              <field name="amount_paid"/>
+              <field name="amount_residual"/>
+              <field name="date_due"/>
+              <field name="state"/>
+              <field name="is_overdue" invisible="1"/>
+              <div invisible="not is_overdue" class="text-danger">
+                <strong>Хугацаа хэтэрсэн</strong>
+              </div>
+              <field name="notes" colspan="2"/>
+            </group>
+          </group>
+          <notebook>
+            <page string="Төлөлтүүд" name="repayments">
+              <field name="repayment_ids" readonly="1" nolabel="1"/>
+            </page>
+          </notebook>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Loan list -->
+  <record id="view_inguumel_credit_loan_tree" model="ir.ui.view">
+    <field name="name">inguumel.credit.loan.tree</field>
+    <field name="model">inguumel.credit.loan</field>
+    <field name="arch" type="xml">
+      <list string="Зээлүүд" decoration-danger="is_overdue" decoration-muted="state == 'cancelled'">
+        <field name="name"/>
+        <field name="warehouse_id"/>
+        <field name="partner_id"/>
+        <field name="amount_total"/>
+        <field name="amount_paid"/>
+        <field name="amount_residual"/>
+        <field name="date_due"/>
+        <field name="state"/>
+        <field name="is_overdue" column_invisible="1"/>
+      </list>
+    </field>
+  </record>
+</odoo>

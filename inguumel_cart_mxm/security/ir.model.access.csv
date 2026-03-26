@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_mxm_cart,access_mxm_cart,inguumel_cart_mxm.model_mxm_cart,,1,1,1,1
+access_mxm_cart_line,access_mxm_cart_line,inguumel_cart_mxm.model_mxm_cart_line,,1,1,1,1

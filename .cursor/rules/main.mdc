@@ -1,0 +1,65 @@
+---
+alwaysApply: true
+---
+
+PROJECT: Odoo 19 + Mobile API (Cloud, production-critical)
+
+ABSOLUTE PRIORITY
+A bug in any mobile API endpoint MUST NOT crash or stop the Odoo service.
+
+MANDATORY RULES
+1) Every HTTP controller MUST wrap logic in try/except Exception
+   - Always return JSON
+   - Never allow unhandled exceptions
+   - Never return recordsets or Python objects
+
+2) Every response MUST follow this shape:
+   {
+     success: boolean,
+     code: string,
+     message: string,
+     request_id: string,
+     data: object | null,
+     meta: object | null
+   }
+
+3) Every request MUST generate request_id (uuid4)
+   - request_id MUST appear in:
+     - response JSON
+     - server logs
+     - error logs with full traceback
+
+4) Validate ALL inputs before ORM:
+   - required fields
+   - types
+   - bounds (limit <= 50, qty <= 999, etc.)
+   - invalid input → 400 JSON (VALIDATION_ERROR)
+
+5) ORM SAFETY:
+   - No unbounded search/search_read
+   - Always use limit/offset for list endpoints
+   - Avoid N+1 ORM loops
+   - Never load binary/image fields in list endpoints
+
+6) Access control:
+   - Do NOT use sudo() unless explicitly justified
+   - When using sudo(), restrict domain + fields
+
+7) Add kill-switch support:
+   - ir.config_parameter: api_disabled:/api/v1/xxx
+   - If disabled → return 503 JSON
+
+8) No heavy logic in controllers
+   - Move business logic to service layer
+   - Controllers should only orchestrate
+
+WORKFLOW (MANDATORY)
+A) Identify root cause and failure type
+B) Patch with safety + validation
+C) Provide smoke test (curl)
+D) Provide restart/upgrade commands
+
+OUTPUT REQUIREMENTS
+- Show file paths changed
+- Show minimal patch snippets
+- Provide 3–5 curl test commands

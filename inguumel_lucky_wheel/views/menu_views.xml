@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Actions must be defined before menuitems that reference them -->
+  <record id="action_lucky_wheel_config" model="ir.actions.act_window">
+    <field name="name">Lucky Wheel Config</field>
+    <field name="res_model">lucky.wheel.config</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_lucky_wheel_nodes" model="ir.actions.act_window">
+    <field name="name">Lucky Wheel Nodes</field>
+    <field name="res_model">lucky.wheel.node</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_lucky_wheel_prizes" model="ir.actions.act_window">
+    <field name="name">Lucky Wheel Prizes</field>
+    <field name="res_model">lucky.wheel.prize</field>
+    <field name="view_mode">list,form</field>
+  </record>
+  <record id="action_lucky_wheel_spend" model="ir.actions.act_window">
+    <field name="name">Leaderboard (Spend)</field>
+    <field name="res_model">lucky.wheel.spend</field>
+    <field name="view_mode">list</field>
+  </record>
+
+  <menuitem id="menu_lucky_wheel_root" name="Lucky Wheel" parent="stock.menu_stock_root" sequence="50"/>
+  <menuitem id="menu_lucky_wheel_config" name="Config" parent="menu_lucky_wheel_root" action="action_lucky_wheel_config" sequence="10"/>
+  <menuitem id="menu_lucky_wheel_nodes" name="Nodes" parent="menu_lucky_wheel_root" action="action_lucky_wheel_nodes" sequence="20"/>
+  <menuitem id="menu_lucky_wheel_prizes" name="Prizes" parent="menu_lucky_wheel_root" action="action_lucky_wheel_prizes" sequence="30"/>
+  <menuitem id="menu_lucky_wheel_leaderboard" name="Leaderboard (Spend)" parent="menu_lucky_wheel_root" action="action_lucky_wheel_spend" sequence="40"/>
+  <menuitem id="menu_lucky_wheel_pivot" name="Prizes Analytics" parent="menu_lucky_wheel_root" action="action_lucky_wheel_prizes_pivot" sequence="50"/>
+</odoo>

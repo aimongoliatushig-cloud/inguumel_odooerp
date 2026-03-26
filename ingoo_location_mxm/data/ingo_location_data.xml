@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+  <!-- Aimags (provinces) -->
+  <record id="aimag_dornod" model="ingo.location.aimag">
+    <field name="name">Дорнод</field>
+  </record>
+  <record id="aimag_ulaanbaatar" model="ingo.location.aimag">
+    <field name="name">Улаанбаатар</field>
+  </record>
+  <!-- Sums (districts) -->
+  <record id="sum_choibalsan" model="ingo.location.sum">
+    <field name="name">Чойбалсан</field>
+    <field name="aimag_id" ref="aimag_dornod"/>
+  </record>
+  <record id="sum_kherlen" model="ingo.location.sum">
+    <field name="name">Хэрлэн</field>
+    <field name="aimag_id" ref="aimag_dornod"/>
+  </record>
+  <record id="sum_bayanzurkh" model="ingo.location.sum">
+    <field name="name">Баянзүрх</field>
+    <field name="aimag_id" ref="aimag_ulaanbaatar"/>
+  </record>
+  <record id="sum_sukhbaatar" model="ingo.location.sum">
+    <field name="name">Сүхбаатар</field>
+    <field name="aimag_id" ref="aimag_ulaanbaatar"/>
+  </record>
+</odoo>

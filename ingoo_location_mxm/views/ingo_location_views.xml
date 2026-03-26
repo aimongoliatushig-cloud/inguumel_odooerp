@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Aimag: Tree + Form -->
+  <record id="view_ingo_location_aimag_tree" model="ir.ui.view">
+    <field name="name">ingo.location.aimag.tree</field>
+    <field name="model">ingo.location.aimag</field>
+    <field name="arch" type="xml">
+      <list string="Aimags" create="1" edit="1" delete="1">
+        <field name="name"/>
+      </list>
+    </field>
+  </record>
+  <record id="view_ingo_location_aimag_form" model="ir.ui.view">
+    <field name="name">ingo.location.aimag.form</field>
+    <field name="model">ingo.location.aimag</field>
+    <field name="arch" type="xml">
+      <form string="Aimag" create="1" edit="1" delete="1">
+        <sheet>
+          <group>
+            <field name="name"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- Sum: Tree + Form + Search -->
+  <record id="view_ingo_location_sum_tree" model="ir.ui.view">
+    <field name="name">ingo.location.sum.tree</field>
+    <field name="model">ingo.location.sum</field>
+    <field name="arch" type="xml">
+      <list string="Sums" create="1" edit="1" delete="1">
+        <field name="name"/>
+        <field name="aimag_id"/>
+      </list>
+    </field>
+  </record>
+  <record id="view_ingo_location_sum_form" model="ir.ui.view">
+    <field name="name">ingo.location.sum.form</field>
+    <field name="model">ingo.location.sum</field>
+    <field name="arch" type="xml">
+      <form string="Sum" create="1" edit="1" delete="1">
+        <sheet>
+          <group>
+            <field name="name"/>
+            <field name="aimag_id" options="{'no_create': False}"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+  <record id="view_ingo_location_sum_search" model="ir.ui.view">
+    <field name="name">ingo.location.sum.search</field>
+    <field name="model">ingo.location.sum</field>
+    <field name="arch" type="xml">
+      <search string="Sum">
+        <field name="name"/>
+        <field name="aimag_id"/>
+        <filter string="By Aimag" name="group_aimag" context="{'group_by':'aimag_id'}"/>
+      </search>
+    </field>
+  </record>
+
+  <!-- Actions -->
+  <record id="action_ingo_location_aimag" model="ir.actions.act_window">
+    <field name="name">Aimag</field>
+    <field name="res_model">ingo.location.aimag</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Create a new Aimag (province)</p>
+    </field>
+  </record>
+  <record id="action_ingo_location_sum" model="ir.actions.act_window">
+    <field name="name">Sum</field>
+    <field name="res_model">ingo.location.sum</field>
+    <field name="view_mode">list,form</field>
+    <field name="context">{}</field>
+    <field name="help" type="html">
+      <p class="o_view_nocontent_smiling_face">Create a new Sum (district)</p>
+    </field>
+  </record>
+
+  <!-- Menus: Locations (Байршил) → Aimag, Sum -->
+  <menuitem id="menu_location_root"
+    name="Байршил"
+    sequence="50"
+  />
+  <menuitem id="menu_location_aimag"
+    name="Aimag"
+    parent="menu_location_root"
+    action="action_ingo_location_aimag"
+    sequence="10"
+  />
+  <menuitem id="menu_location_sum"
+    name="Sum"
+    parent="menu_location_root"
+    action="action_ingo_location_sum"
+    sequence="20"
+  />
+</odoo>

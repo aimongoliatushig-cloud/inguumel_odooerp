@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Delivery list: sale orders that require delivery (confirmed/done), no native state/stock -->
+    <record id="view_delivery_order_tree" model="ir.ui.view">
+        <field name="name">sale.order.tree.delivery</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <list string="Хүргэлт" create="0" delete="0" decoration-muted="mxm_delivery_status == 'delivered'" decoration-info="mxm_delivery_status == 'out_for_delivery'">
+                <field name="name" string="Order"/>
+                <field name="partner_id" string="Customer" options="{'no_create': True}"/>
+                <field name="x_phone_primary" string="Phone"/>
+                <field name="x_delivery_address" string="Delivery Address"/>
+                <field name="mxm_last_status_label_mn" string="Status"/>
+                <field name="mxm_last_status_at" string="Last Change"/>
+                <field name="mxm_delivery_status" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Delivery Workbench: read-only timeline + action buttons only -->
+    <record id="view_delivery_order_form_workbench" model="ir.ui.view">
+        <field name="name">sale.order.form.delivery.workbench</field>
+        <field name="model">sale.order</field>
+        <field name="arch" type="xml">
+            <form string="Delivery Workbench" create="0" delete="0">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1" class="oe_inline"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Customer">
+                            <field name="partner_id" readonly="1" options="{'no_create': True}"/>
+                            <field name="x_phone_primary" readonly="1" string="Phone"/>
+                            <field name="x_phone_secondary" readonly="1" optional="hide"/>
+                            <field name="x_delivery_address" readonly="1" nolabel="1" placeholder="Delivery address"/>
+                        </group>
+                        <group string="Delivery Status">
+                            <field name="mxm_last_status_label_mn" string="Current Step" readonly="1" class="fw-bold"/>
+                            <field name="mxm_last_status_at" string="Last Change" readonly="1"/>
+                            <field name="mxm_delivery_status" invisible="1"/>
+                            <field name="mxm_last_status_code" invisible="1"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-primary mb-3" role="alert">
+                        <h4 class="alert-heading text-uppercase mb-2">ЗАХИАЛГЫН ЯВЦ</h4>
+                        <field name="mxm_timeline_html" nolabel="1" readonly="1" widget="html"/>
+                    </div>
+                    <div class="alert alert-success mb-3" role="alert" name="delivery_workbench_actions" groups="stock.group_stock_user">
+                        <p class="mb-2 fw-bold">Дараагийн алхам</p>
+                        <button name="action_mxm_preparing" string="Бэлтгэж байна" type="object" class="btn btn-lg btn-success" invisible="mxm_delivery_status != 'received'"/>
+                        <button name="action_mxm_prepared" string="Бэлтгэж дууссан" type="object" class="btn btn-lg btn-success" invisible="mxm_delivery_status != 'preparing'"/>
+                        <button name="action_mxm_out_for_delivery" string="Хүргэлтэд гарсан" type="object" class="btn btn-lg btn-success" invisible="mxm_delivery_status != 'prepared'"/>
+                        <button name="action_mxm_delivered" string="Хүргэгдсэн" type="object" class="btn btn-lg btn-success" invisible="mxm_delivery_status != 'out_for_delivery'"/>
+                        <span class="badge bg-success fs-6 px-3 py-2" invisible="mxm_delivery_status != 'delivered'">Дууссан</span>
+                    </div>
+                    <group string="Status History" optional="show">
+                        <field name="mxm_status_log_ids" nolabel="1" readonly="1" colspan="2">
+                            <list decoration-muted="[('is_last', '=', False)]" create="0" delete="0" edit="0" default_order="at asc">
+                                <field name="display_line"/>
+                                <field name="at_hhmm"/>
+                                <field name="source"/>
+                                <field name="user_id" optional="show"/>
+                            </list>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action: open delivery list + workbench form -->
+    <record id="action_delivery_orders" model="ir.actions.act_window">
+        <field name="name">Хүргэлт</field>
+        <field name="res_model">sale.order</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state', 'in', ['sale', 'done'])]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No orders to deliver</p>
+            <p>Confirmed sale orders appear here. Use the Delivery Workbench to update status.</p>
+        </field>
+    </record>
+    <record id="action_delivery_orders_view_list" model="ir.actions.act_window.view">
+        <field name="act_window_id" ref="action_delivery_orders"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_delivery_order_tree"/>
+        <field name="sequence">1</field>
+    </record>
+    <record id="action_delivery_orders_view_form" model="ir.actions.act_window.view">
+        <field name="act_window_id" ref="action_delivery_orders"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_delivery_order_form_workbench"/>
+        <field name="sequence">2</field>
+    </record>
+
+    <!-- Menu: Inguumel (root) → Хүргэлт (delivery list); only stock/delivery users -->
+    <menuitem id="menu_inguumel_root"
+              name="Inguumel"
+              sequence="1"/>
+    <menuitem id="menu_inguumel_delivery"
+              name="Хүргэлт"
+              parent="menu_inguumel_root"
+              action="action_delivery_orders"
+              sequence="10"
+              groups="stock.group_stock_user"/>
+</odoo>

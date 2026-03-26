@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ingo_location_aimag_user,access_ingo_location_aimag_user,model_ingo_location_aimag,base.group_user,1,1,1,1
+access_ingo_location_aimag_public,access_ingo_location_aimag_public,model_ingo_location_aimag,base.group_public,1,0,0,0
+access_ingo_location_sum_user,access_ingo_location_sum_user,model_ingo_location_sum,base.group_user,1,1,1,1
+access_ingo_location_sum_public,access_ingo_location_sum_public,model_ingo_location_sum,base.group_public,1,0,0,0

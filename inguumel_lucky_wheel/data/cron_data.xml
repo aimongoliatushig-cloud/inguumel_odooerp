@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="cron_expire_lucky_wheel_prizes" model="ir.cron">
+    <field name="name">Lucky Wheel: Expire prizes</field>
+    <field name="model_id" ref="model_lucky_wheel_prize"/>
+    <field name="state">code</field>
+    <field name="code">model._cron_expire_prizes()</field>
+    <field name="interval_number">1</field>
+    <field name="interval_type">days</field>
+  </record>
+</odoo>

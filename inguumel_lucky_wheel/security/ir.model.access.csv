@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_lucky_wheel_config,access_lucky_wheel_config,inguumel_lucky_wheel.model_lucky_wheel_config,,1,1,1,1
+access_lucky_wheel_node,access_lucky_wheel_node,inguumel_lucky_wheel.model_lucky_wheel_node,,1,1,1,1
+access_lucky_wheel_spend,access_lucky_wheel_spend,inguumel_lucky_wheel.model_lucky_wheel_spend,,1,1,1,1
+access_lucky_wheel_prize,access_lucky_wheel_prize,inguumel_lucky_wheel.model_lucky_wheel_prize,,1,1,1,1

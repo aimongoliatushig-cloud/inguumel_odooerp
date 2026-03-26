@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_lucky_wheel_spend_tree" model="ir.ui.view">
+    <field name="name">lucky.wheel.spend.tree</field>
+    <field name="model">lucky.wheel.spend</field>
+    <field name="arch" type="xml">
+      <list string="Lucky Wheel Spend (Leaderboard)" create="0" delete="0" default_order="accumulated_paid_amount desc, spins_consumed desc">
+        <field name="display_name"/>
+        <field name="user_id"/>
+        <field name="partner_id"/>
+        <field name="warehouse_id"/>
+        <field name="accumulated_paid_amount"/>
+        <field name="spins_consumed"/>
+        <field name="computed_spin_credits"/>
+      </list>
+    </field>
+  </record>
+</odoo>

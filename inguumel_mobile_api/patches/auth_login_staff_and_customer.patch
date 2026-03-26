@@ -1,0 +1,78 @@
+--- a/controllers/auth.py
++++ b/controllers/auth.py
+@@ -24,6 +24,18 @@ from odoo.addons.inguumel_mobile_api.controllers.pin import (
+ 
+ _logger = logging.getLogger(__name__)
+ 
++
++def _mask_phone(phone):
++    """Return masked phone for logging (never log full phone)."""
++    if not phone or not isinstance(phone, str):
++        return "***"
++    phone = phone.strip()
++    return ("***" + phone[-4:]) if len(phone) >= 4 else "***"
++
++
+ def _create_access_token(env, uid, request_id):
+     """Create Bearer token for user. Returns token string or None on failure."""
+     try:
+@@ -365,6 +377,8 @@ class AuthAPI(http.Controller):
+             env = http.request.env
+             User = env["res.users"].sudo()
+             Partner = env["res.partner"].sudo()
++            phone_masked = _mask_phone(phone)
+ 
+             user = None
+             matched_source = None
+             partner = None
+ 
++            # 1) Staff flow: try res.users by login=phone
++            user = User.search([("active", "=", True), ("login", "=", phone)], limit=1)
++            if user:
++                matched_source = "user_login"
++
++            # 2) Staff flow: try by partner.phone then partner.mobile (separate searches)
++            if not user and "phone" in Partner._fields:
++                user = User.search([("active", "=", True), ("partner_id.phone", "=", phone)], limit=1)
++                if user:
++                    matched_source = "user_partner_phone"
++            if not user and "mobile" in Partner._fields:
++                user = User.search([("active", "=", True), ("partner_id.mobile", "=", phone)], limit=1)
++                if user:
++                    matched_source = "user_partner_mobile"
++
++            if user:
++                # Staff flow: authenticate with password (pin as password), no x_pin_hash
++                credential = {"login": user.login, "password": pin_str, "type": "password"}
++                try:
++                    auth_info = http.request.session.authenticate(env, credential)
++                    if auth_info and auth_info.get("uid"):
++                        partner = user.partner_id
++                        access_token = _create_access_token(env, user.id, request_id)
++                        if access_token is None:
++                            return fail(...)
++                        role = "warehouse_owner" if _is_warehouse_owner(user) else "customer"
++                        warehouse_ids = list(user.x_warehouse_ids.ids) if _is_warehouse_owner(user) else []
++                        _logger.info("auth.login success uid=%s partner_id=%s role=%s matched_source=%s phone=%s request_id=%s", ...)
++                        return ok(data={uid, partner_id, access_token, expires_in, role, warehouse_ids}, ...)
++                except Exception as auth_err:
++                    _logger.info("auth.login INVALID_PIN identity=user matched_source=%s phone=%s request_id=%s err=%s", ...)
++                    return fail(code="INVALID_PIN", http_status=401, ...)
++
++            # 3) Partner flow: mobile customers with phone + x_pin_hash (unchanged)
+             partner = Partner.search([("phone", "=", phone)], limit=1)
+-            if not partner or not partner.x_pin_hash:
+-                return fail(code="INVALID_PIN", ...)
++            if not partner:
++                _logger.info("auth.login USER_NOT_FOUND no user no partner phone=%s request_id=%s", ...)
++                return fail(code="USER_NOT_FOUND", ...)
++            if not partner.x_pin_hash:
++                _logger.info("auth.login USER_NOT_FOUND partner has no x_pin_hash phone=%s request_id=%s", ...)
++                return fail(code="USER_NOT_FOUND", ...)
+ 
+             salt = _ensure_pin_salt(env)
+             computed = _hash_pin_register(pin_str, phone, salt)
+             if computed != partner.x_pin_hash:
++                matched_source = "partner"
++                _logger.info("auth.login INVALID_PIN identity=partner matched_source=%s phone=%s request_id=%s", ...)
+                 return fail(code="INVALID_PIN", ...)

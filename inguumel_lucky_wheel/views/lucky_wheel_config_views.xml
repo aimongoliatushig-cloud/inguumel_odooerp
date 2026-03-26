@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_lucky_wheel_config_tree" model="ir.ui.view">
+    <field name="name">lucky.wheel.config.tree</field>
+    <field name="model">lucky.wheel.config</field>
+    <field name="arch" type="xml">
+      <list string="Lucky Wheel Config" create="1" edit="1" delete="1">
+        <field name="warehouse_id"/>
+        <field name="threshold_amount"/>
+        <field name="active"/>
+        <field name="default_expire_days"/>
+        <field name="emergency_global_fallback_enabled"/>
+        <field name="top_prize_cooldown_days"/>
+      </list>
+    </field>
+  </record>
+  <record id="view_lucky_wheel_config_form" model="ir.ui.view">
+    <field name="name">lucky.wheel.config.form</field>
+    <field name="model">lucky.wheel.config</field>
+    <field name="arch" type="xml">
+      <form string="Lucky Wheel Config">
+        <sheet>
+          <group>
+            <group>
+              <field name="warehouse_id"/>
+              <field name="threshold_amount"/>
+              <field name="active"/>
+              <field name="default_expire_days"/>
+              <field name="top_prize_cooldown_days"/>
+              <field name="emergency_global_fallback_enabled"/>
+            </group>
+            <group string="Fallback (when node product OOS)">
+              <field name="fallback_product_id"/>
+              <field name="fallback_coupon_payload"/>
+            </group>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+</odoo>

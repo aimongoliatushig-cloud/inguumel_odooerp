@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_inguumel_credit_repayment_wizard,inguumel.credit.repayment.wizard,model_inguumel_credit_repayment_wizard,base.group_user,1,1,1,1
+access_inguumel_credit_loan_user,inguumel.credit.loan.user,model_inguumel_credit_loan,base.group_user,1,1,1,0
+access_inguumel_credit_loan_manager,inguumel.credit.loan.manager,model_inguumel_credit_loan,account.group_account_manager,1,1,1,1
+access_inguumel_credit_repayment_user,inguumel.credit.repayment.user,model_inguumel_credit_repayment,base.group_user,1,1,1,1
+access_inguumel_credit_repayment_manager,inguumel.credit.repayment.manager,model_inguumel_credit_repayment,account.group_account_manager,1,1,1,1
+access_inguumel_credit_request_user,inguumel.credit.request.user,model_inguumel_credit_request,base.group_user,1,1,1,0
+access_inguumel_credit_request_manager,inguumel.credit.request.manager,model_inguumel_credit_request,account.group_account_manager,1,1,1,1

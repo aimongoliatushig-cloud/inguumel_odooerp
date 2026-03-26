@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <menuitem id="menu_lucky_wheel_root" name="Lucky Wheel" sequence="90"/>
+
+  <menuitem id="menu_lucky_wheel_config" name="Configuration"
+            parent="menu_lucky_wheel_root" sequence="10"/>
+
+  <menuitem id="menu_lucky_wheel_configs" name="Lucky Wheel Configs"
+            parent="menu_lucky_wheel_config" action="action_lucky_wheel_config" sequence="10"/>
+
+  <menuitem id="menu_lucky_wheel_nodes" name="Wheel Nodes"
+            parent="menu_lucky_wheel_config" action="action_lucky_wheel_node" sequence="20"/>
+
+  <menuitem id="menu_lucky_wheel_prizes" name="Prizes"
+            parent="menu_lucky_wheel_root" action="action_lucky_wheel_prize" sequence="20"/>
+
+  <menuitem id="menu_lucky_wheel_leaderboard" name="Leaderboard"
+            parent="menu_lucky_wheel_root" action="action_lucky_wheel_spend" sequence="30"/>
+</odoo>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_lucky_wheel_node_tree" model="ir.ui.view">
+    <field name="name">lucky.wheel.node.tree</field>
+    <field name="model">lucky.wheel.node</field>
+    <field name="arch" type="xml">
+      <list string="Lucky Wheel Nodes" create="1" edit="1" delete="1">
+        <field name="warehouse_id"/>
+        <field name="node_index"/>
+        <field name="prize_type"/>
+        <field name="product_id"/>
+        <field name="weight"/>
+        <field name="is_top_prize"/>
+        <field name="active"/>
+      </list>
+    </field>
+  </record>
+  <record id="view_lucky_wheel_node_form" model="ir.ui.view">
+    <field name="name">lucky.wheel.node.form</field>
+    <field name="model">lucky.wheel.node</field>
+    <field name="arch" type="xml">
+      <form string="Lucky Wheel Node">
+        <sheet>
+          <group>
+            <field name="warehouse_id"/>
+            <field name="node_index"/>
+            <field name="prize_type"/>
+            <field name="product_id" invisible="prize_type != 'product'"/>
+            <field name="coupon_payload" invisible="prize_type != 'coupon'"/>
+            <field name="weight"/>
+            <field name="is_top_prize"/>
+            <field name="active"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+</odoo>

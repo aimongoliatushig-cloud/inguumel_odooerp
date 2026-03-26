@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Search view must be defined before action that references it -->
+  <record id="view_lucky_wheel_prize_search" model="ir.ui.view">
+    <field name="name">lucky.wheel.prize.search</field>
+    <field name="model">lucky.wheel.prize</field>
+    <field name="arch" type="xml">
+      <search string="Search Prizes">
+        <field name="partner_id"/>
+        <field name="warehouse_id"/>
+        <field name="state"/>
+        <field name="prize_type"/>
+        <filter string="Redeemed" name="redeemed" domain="[('state','=','redeemed')]"/>
+        <filter string="Pending" name="pending" domain="[('state','in',['won','pending'])]"/>
+        <filter string="Expired" name="expired" domain="[('state','=','expired')]"/>
+      </search>
+    </field>
+  </record>
+  <record id="action_lucky_wheel_prizes_pivot" model="ir.actions.act_window">
+    <field name="name">Prizes Pivot (Admin)</field>
+    <field name="res_model">lucky.wheel.prize</field>
+    <field name="view_mode">pivot,list</field>
+    <field name="search_view_id" ref="view_lucky_wheel_prize_search"/>
+  </record>
+</odoo>
