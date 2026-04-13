@@ -290,6 +290,58 @@ class SaleOrder(models.Model):
                                 ).process()
                         except Exception:
                             return False, "Validation requires user action. Complete delivery in Inventory."
+                    elif wiz_model == "stock.backorder.confirmation":
+                        try:
+                            wiz = (
+                                self.env["stock.backorder.confirmation"]
+                                .sudo()
+                                .with_context(
+                                    active_model="stock.picking",
+                                    active_ids=picking.ids,
+                                    active_id=picking.id,
+                                    button_validate_picking_ids=picking.ids,
+                                )
+                                .create(
+                                    {
+                                        "pick_ids": [(6, 0, picking.ids)],
+                                    }
+                                )
+                            )
+                            if hasattr(wiz, "process"):
+                                wiz.process()
+                            elif hasattr(wiz, "process_cancel_backorder"):
+                                wiz.process_cancel_backorder()
+                        except Exception:
+                            return (
+                                False,
+                                "Validation requires user action (backorder or wizard). Complete delivery in Inventory.",
+                            )
+                    elif wiz_model == "confirm.stock.sms":
+                        try:
+                            wiz = (
+                                self.env["confirm.stock.sms"]
+                                .sudo()
+                                .with_context(
+                                    active_model="stock.picking",
+                                    active_ids=picking.ids,
+                                    active_id=picking.id,
+                                    button_validate_picking_ids=picking.ids,
+                                )
+                                .create(
+                                    {
+                                        "pick_ids": [(6, 0, picking.ids)],
+                                    }
+                                )
+                            )
+                            if hasattr(wiz, "dont_send_sms"):
+                                wiz.dont_send_sms()
+                            elif hasattr(wiz, "send_sms"):
+                                wiz.send_sms()
+                        except Exception:
+                            return (
+                                False,
+                                "Validation requires user action (SMS confirmation or wizard). Complete delivery in Inventory.",
+                            )
                     else:
                         return False, "Validation requires user action (backorder or wizard). Complete delivery in Inventory."
                 picking.invalidate_recordset()
@@ -393,6 +445,18 @@ class SaleOrder(models.Model):
             "x_paid_at": now,
             "x_cash_confirmed_by": self.env.user.id,
             "x_cash_confirmed_at": now,
+            "x_cod_confirmed": True,
+            "x_cod_confirmed_at": now,
+            "x_cod_confirmed_by": self.env.user.id,
+            "x_cod_amount": self.amount_total or 0,
+        })
+        self.env["mxm.order.status.log"].sudo().create({
+            "order_id": self.id,
+            "code": "cod_confirmed",
+            "at": now,
+            "user_id": self.env.user.id,
+            "source": "staff",
+            "note": "Cash confirmed by cashier",
         })
         msg = (
             "[CASH_CONFIRM] order=%s partner=%s warehouse=%s total=%s user=%s"

@@ -4,9 +4,10 @@ Auth API – register, login, me, logout as normal HTTP JSON (type="http").
 """
 import json
 import logging
+import time
 import traceback
 
-from odoo import http
+from odoo import fields, http
 
 from odoo.addons.inguumel_mobile_api.controllers.base import (
     get_request_id,
@@ -485,6 +486,142 @@ def _auth_login_phone_pin(payload, request_id):
     )
 
 
+def _is_customer_only_user(user):
+    """True only for customer/portal accounts; false for staff, drivers, cashiers, owners, admins."""
+    roles = _mxm_roles_for_user(user)
+    privileged_roles = {"admin", "staff", "warehouse_owner", "driver", "cashier"}
+    return not any(role in privileged_roles for role in roles)
+
+
+def _anonymize_mobile_customer_account(env, partner, user=None, request_id=None):
+    """
+    Deactivate the mobile customer account and anonymize personal data while
+    keeping legally required transaction history intact.
+    """
+    partner = partner.sudo() if partner else None
+    user = user.sudo() if user else None
+    if not partner or not partner.exists():
+        raise ValueError("Partner not found")
+
+    suffix = "deleted_%s_%s" % (partner.id, int(time.time()))
+    partner_vals = {
+        "name": "Deleted customer %s" % partner.id,
+    }
+    for field_name in (
+        "phone",
+        "mobile",
+        "email",
+        "street",
+        "street2",
+        "city",
+        "zip",
+        "x_pin_hash",
+        "x_phone_2",
+        "x_default_warehouse_id",
+        "x_aimag_id",
+        "x_sum_id",
+    ):
+        if field_name in partner._fields:
+            partner_vals[field_name] = False
+    if "active" in partner._fields:
+        partner_vals["active"] = False
+
+    if user and user.exists():
+        env["api.access.token"].sudo().search([("user_id", "=", user.id)]).unlink()
+        user_vals = {
+            "login": suffix,
+            "active": False,
+        }
+        user.write(user_vals)
+        try:
+            if getattr(http.request.session, "uid", None) == user.id:
+                http.request.session.logout(keep_db=True)
+        except Exception:
+            pass
+
+    partner.write(partner_vals)
+
+    _logger.info(
+        "auth.account_delete success partner_id=%s user_id=%s request_id=%s deleted_at=%s",
+        partner.id,
+        user.id if user and user.exists() else None,
+        request_id,
+        fields.Datetime.now(),
+        extra={"request_id": request_id},
+    )
+    return {
+        "deleted": True,
+        "retention_note": (
+            "Personal profile data is anonymized, while order or accounting "
+            "records may be retained when required by law."
+        ),
+    }
+
+
+def _resolve_customer_delete_request(payload, request_id):
+    """Resolve a customer account for public delete requests using phone + PIN."""
+    payload = payload or {}
+    phone = (payload.get("phone") or "")
+    phone = phone.strip() if isinstance(phone, str) else ""
+    pin_str = str(payload.get("pin") or "").strip()
+
+    if not phone:
+        return None, None, fail_payload(
+            "phone is required",
+            code="VALIDATION_ERROR",
+            http_status=400,
+            request_id=request_id,
+        )
+    if len(pin_str) != 6 or not pin_str.isdigit():
+        return None, None, fail_payload(
+            "pin must be exactly 6 digits",
+            code="VALIDATION_ERROR",
+            http_status=400,
+            request_id=request_id,
+        )
+
+    env = http.request.env
+    Partner = env["res.partner"].sudo()
+    User = env["res.users"].sudo()
+
+    if "phone" not in Partner._fields or "x_pin_hash" not in Partner._fields:
+        return None, None, fail_payload(
+            "Invalid credentials",
+            code="INVALID_PIN",
+            http_status=401,
+            request_id=request_id,
+        )
+
+    partner = Partner.search([("phone", "=", phone)], limit=1)
+    if not partner or not partner.x_pin_hash:
+        return None, None, fail_payload(
+            "Invalid credentials",
+            code="INVALID_PIN",
+            http_status=401,
+            request_id=request_id,
+        )
+
+    salt = _ensure_pin_salt(env)
+    computed = _hash_pin_register(pin_str, phone, salt)
+    if computed != partner.x_pin_hash:
+        return None, None, fail_payload(
+            "Invalid credentials",
+            code="INVALID_PIN",
+            http_status=401,
+            request_id=request_id,
+        )
+
+    user = User.search([("partner_id", "=", partner.id)], limit=1)
+    if user and user.exists() and not _is_customer_only_user(user):
+        return None, None, fail_payload(
+            "This account must be deleted by an administrator.",
+            code="FORBIDDEN",
+            http_status=403,
+            request_id=request_id,
+        )
+    return user, partner, None
+
+
 class AuthAPI(http.Controller):
     """Auth endpoints: login, me, logout (HTTP JSON, no jsonrpc)."""
 
@@ -593,6 +730,104 @@ class AuthAPI(http.Controller):
             _logger.exception("auth.register error: %s", e, extra={"request_id": request_id})
             return fail_payload(
                 "Internal error",
+                code="ERROR",
+                http_status=500,
+                request_id=request_id,
+            )
+
+    @http.route(
+        "/api/v1/auth/account/delete_request",
+        type="http",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+    )
+    def delete_account_request(self, **kwargs):
+        """Public account deletion using phone + PIN for web deletion flows."""
+        request_id = get_request_id()
+        try:
+            payload, err = _parse_json_body(http.request, request_id)
+            if err is not None:
+                return err
+
+            user, partner, err = _resolve_customer_delete_request(payload, request_id)
+            if err is not None:
+                return err
+
+            data = _anonymize_mobile_customer_account(
+                http.request.env,
+                partner,
+                user=user,
+                request_id=request_id,
+            )
+            return ok(data=data, message="ACCOUNT_DELETED", request_id=request_id)
+        except Exception as e:
+            _logger.exception(
+                "auth.delete_account_request error: %s request_id=%s",
+                e,
+                request_id,
+                extra={"request_id": request_id},
+            )
+            return fail_payload(
+                "Internal error",
+                code="ERROR",
+                http_status=500,
+                request_id=request_id,
+            )
+
+    @http.route(
+        "/api/v1/auth/account/delete",
+        type="http",
+        auth="public",
+        methods=["POST"],
+        csrf=False,
+    )
+    def delete_account(self, **kwargs):
+        """Authenticated in-app deletion for customer accounts."""
+        request_id = get_request_id()
+        try:
+            uid = getattr(http.request.session, "uid", None)
+            if not uid:
+                return fail(
+                    message="Unauthorized",
+                    code="UNAUTHORIZED",
+                    http_status=401,
+                    request_id=request_id,
+                )
+
+            user = http.request.env["res.users"].sudo().browse(int(uid))
+            partner = user.partner_id.sudo() if user and user.exists() else None
+            if not user or not user.exists() or not partner or not partner.exists():
+                return fail(
+                    message="Unauthorized",
+                    code="UNAUTHORIZED",
+                    http_status=401,
+                    request_id=request_id,
+                )
+            if not _is_customer_only_user(user):
+                return fail(
+                    message="This account must be deleted by an administrator.",
+                    code="FORBIDDEN",
+                    http_status=403,
+                    request_id=request_id,
+                )
+
+            data = _anonymize_mobile_customer_account(
+                http.request.env,
+                partner,
+                user=user,
+                request_id=request_id,
+            )
+            return ok(data=data, message="ACCOUNT_DELETED", request_id=request_id)
+        except Exception as e:
+            _logger.exception(
+                "auth.delete_account error: %s request_id=%s",
+                e,
+                request_id,
+                extra={"request_id": request_id},
+            )
+            return fail(
+                message="Internal error",
                 code="ERROR",
                 http_status=500,
                 request_id=request_id,
